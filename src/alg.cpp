@@ -45,10 +45,10 @@ std::string infx2pstfx(std::string inf) {
     return pst;
 }
 
-int eval(std::string pref) {
-    TStack<int, 100> stack;
+int eval(std::string post) {
     std::istringstream iss(post);
     std::string token;
+    TStack<int, 100> stack;
 
     while (iss >> token) {
         if (std::isdigit(token[0])) {
@@ -74,7 +74,7 @@ int eval(std::string pref) {
         }
     }
 
-    return stack.pop();
+    return stack.pop(); // Возвращаем результат вычисления
 }
 
 
