@@ -17,7 +17,7 @@ std::string infx2pstfx(std::string inf) {
     TStack<char, 100> stack;
     std::string pst;
 
-    for (char c: inf) {
+    for (char c : inf) {
         if (std::isdigit(c)) {
             pst.push_back(c);
         } else if (c == '(') {
@@ -29,7 +29,6 @@ std::string infx2pstfx(std::string inf) {
             }
             stack.pop();
         } else if (isOperator(c)) {
-
             while (!stack.isEmpty() && priority(stack.get()) >= priority(c)) {
                 pst.push_back(' ');
                 pst.push_back(stack.pop());
