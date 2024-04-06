@@ -1,6 +1,7 @@
 // Copyright 2021 NNTU-CS
 #include <string>
 #include <map>
+#include <sstream>
 #include "tstack.h"
 
 bool isOperator(char c) {
