@@ -17,29 +17,41 @@ int priority(char op) {
 std::string infx2pstfx(std::string inf) {
     TStack<char, 100> stack;
     std::string pst;
+    std::string numBuffer; 
 
     for (char c : inf) {
         if (std::isdigit(c)) {
-            pst.push_back(c);
-        } else if (c == '(') {
-            stack.push(c);
-        } else if (c == ')') {
-            while (!stack.isEmpty() && stack.get() != '(') {
-                pst.push_back(' ');
-                pst.push_back(stack.pop());
+            numBuffer.push_back(c);
+        } else {
+            if (!numBuffer.empty()) {
+                pst += numBuffer + ' '; 
+                numBuffer.clear(); 
             }
-            stack.pop();
-        } else if (isOperator(c)) {
-            while (!stack.isEmpty() && priority(stack.get()) >= priority(c)) {
-                pst.push_back(' ');
-                pst.push_back(stack.pop());
+            if (c == '(') {
+                stack.push(c);
+            } else if (c == ')') {
+                while (!stack.isEmpty() && stack.get() != '(') {
+                    pst.push_back(stack.pop());
+                    pst.push_back(' ');
+                }
+                stack.pop();
+            } else if (isOperator(c)) {
+                while (!stack.isEmpty() && priority(stack.get()) >= priority(c)) {
+                    pst.push_back(stack.pop());
+                    pst.push_back(' ');
+                }
+                stack.push(c);
             }
-            stack.push(c);
         }
     }
+
+    if (!numBuffer.empty()) {
+        pst += numBuffer + ' '; 
+    }
+
     while (!stack.isEmpty()) {
-        pst.push_back(' ');
         pst.push_back(stack.pop());
+        pst.push_back(' ');
     }
 
     return pst;
@@ -51,12 +63,14 @@ int eval(std::string post) {
     TStack<int, 100> stack;
 
     while (iss >> token) {
-        if (std::isdigit(token[0])) {
-            stack.push(std::stoi(token)); // Если это число, помещаем его в стек
+        if (std::isdigit(token[0]) || (token[0] == '-' && token.size() > 1)) {
+            stack.push(std::stoi(token)); 
         } else if (isOperator(token[0])) {
             int operand2 = stack.pop();
             int operand1 = stack.pop();
-
+            if (operand2 == 0 && token[0] == '/') {
+                throw std::invalid_argument("Division by zero!");
+            }
             switch (token[0]) {
                 case '+':
                     stack.push(operand1 + operand2);
@@ -74,7 +88,7 @@ int eval(std::string post) {
         }
     }
 
-    return stack.pop(); // Возвращаем результат вычисления
+    return stack.pop();
 }
 
 
