@@ -23,7 +23,7 @@ class TStack {
     T pop() {
         if (isEmpty()) {
             throw std::string("Empty");
-        }else {
+        } else {
             return data[top--];
         }
     }
