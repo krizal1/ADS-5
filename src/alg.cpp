@@ -1,94 +1,82 @@
 // Copyright 2021 NNTU-CS
-#include <string>
 #include <map>
-#include <sstream>
 #include "tstack.h"
 
-bool isOperator(char c) {
-    return c == '+' || c == '-' || c == '*' || c == '/';
-}
-
-int priority(char op) {
-    if (op == '+' || op == '-') return 1;
-    if (op == '*' || op == '/') return 2;
+int Priority(char operand) {
+    if (operand == '+' || operand == '-') return 1;
+    if (operand == '*' || operand == '/') return 2;
     return 0;
+}
+bool isOperator(char c) {
+    return (c == '+' || c == '-' || c == '*' || c == '/');
 }
 
 std::string infx2pstfx(std::string inf) {
+    std::string postfix;
     TStack<char, 100> stack;
-    std::string pst;
-    std::string numBuffer; 
-
     for (char c : inf) {
-        if (std::isdigit(c)) {
-            numBuffer.push_back(c);
-        } else {
-            if (!numBuffer.empty()) {
-                pst += numBuffer + ' '; 
-                numBuffer.clear(); 
-            }
-            if (c == '(') {
-                stack.push(c);
-            } else if (c == ')') {
-                while (!stack.isEmpty() && stack.get() != '(') {
-                    pst.push_back(stack.pop());
-                    pst.push_back(' ');
-                }
+        if (isdigit(c)) {
+            postfix = postfix + c + ' ';
+        }else if (c == '(') {
+            stack.push(c);
+        }else if (isOperator(c)) {
+            while (!stack.isEmpty() && Priority(stack.get()) >= Priority(c)) {
+                postfix = postfix + stack.get() + ' ';
                 stack.pop();
-            } else if (isOperator(c)) {
-                while (!stack.isEmpty() && priority(stack.get()) >= priority(c)) {
-                    pst.push_back(stack.pop());
-                    pst.push_back(' ');
-                }
-                stack.push(c);
             }
+            stack.push(c);
+        }else if (c == ')') {
+            while (!stack.isEmpty() && stack.get() != '(') {
+                postfix = postfix + stack.get() + ' ';
+                stack.pop();
+            }
+            stack.pop();
         }
     }
-
-    if (!numBuffer.empty()) {
-        pst += numBuffer + ' '; 
-    }
-
     while (!stack.isEmpty()) {
-        pst.push_back(stack.pop());
-        pst.push_back(' ');
+        postfix = postfix + stack.get() + ' ';
+        stack.pop();
     }
-
-    return pst;
+    if (!postfix.empty()) {
+        postfix.pop_back();
+    }
+    return postfix;
 }
-
 int eval(std::string post) {
-    std::istringstream iss(post);
-    std::string token;
     TStack<int, 100> stack;
-
-    while (iss >> token) {
-        if (std::isdigit(token[0]) || (token[0] == '-' && token.size() > 1)) {
-            stack.push(std::stoi(token)); 
-        } else if (isOperator(token[0])) {
-            int operand2 = stack.pop();
-            int operand1 = stack.pop();
-            if (operand2 == 0 && token[0] == '/') {
-                throw std::invalid_argument("Division by zero!");
-            }
-            switch (token[0]) {
-                case '+':
-                    stack.push(operand1 + operand2);
-                    break;
-                case '-':
-                    stack.push(operand1 - operand2);
-                    break;
-                case '*':
-                    stack.push(operand1 * operand2);
-                    break;
-                case '/':
-                    stack.push(operand1 / operand2);
-                    break;
+    std::string Number;
+    for (char c : post) {
+        if (isdigit(c)) {
+            Number += c;
+        }else if (Number != "") {
+            stack.push(std::atoi(Number.c_str()));
+            Number = "";
+        }
+        if (isOperator(c)) {
+            int op2 = stack.get();
+            stack.pop();
+            int op1 = stack.get();
+            stack.pop();
+            switch (c) {
+            case '+':
+                stack.push(op1 + op2);
+                break;
+            case '-':
+                stack.push(op1 - op2);
+                break;
+            case '*':
+                stack.push(op1 * op2);
+                break;
+            case '/':
+                stack.push(op1 / op2);
+                break;
             }
         }
     }
-
-    return stack.pop();
+    if (Number != "") {
+        stack.push(std::atoi(Number.c_str()));
+    }
+    return stack.get();
 }
 
 
